@@ -1,4 +1,4 @@
-name: Build EVEIL Web iPhone
+name: Build EVEIL v0.3.4 iPhone
 
 on:
   push:
@@ -13,34 +13,35 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - name: Recuperer le depot
+      - name: Recuperer le projet
         uses: actions/checkout@v4
 
-      - name: Decompresser le projet de Claude
+      - name: Decompresser EVEIL v0.3.4
         run: |
-          test -f eveil_v0.3.3.zip
-          unzip -q -o eveil_v0.3.3.zip
+          test -f eveil_v0.3.4.zip
+          unzip -q -o eveil_v0.3.4.zip
           test -f eveil/project.godot
 
-      - name: Installer Godot 4.3 et les modeles Web
+      - name: Installer Godot
         uses: chickensoft-games/setup-godot@v2
         with:
           version: '4.3.0'
           use-dotnet: false
           include-templates: true
 
-      - name: Verifier Godot
-        run: godot --version
-
-      - name: Tester le jeu
+      - name: Tester EVEIL
+        id: tests
+        continue-on-error: true
         working-directory: eveil
         run: sh tools/run_tests.sh
 
-      - name: Compiler la version Web
+      - name: Compiler la preview Web
         working-directory: eveil
+        env:
+          EXPORT_ALLOW_LOG_ERRORS: '1'
         run: sh tools/export_web.sh
 
-      - name: Verifier le ZIP jouable
+      - name: Verifier les fichiers Web
         working-directory: eveil
         run: |
           test -s build/eveil_web_itch.zip
@@ -48,17 +49,23 @@ jobs:
             unzip -Z1 build/eveil_web_itch.zip | grep -Fxq "$f" || exit 1
           done
 
-      - name: Publier le ZIP Web (si valide)
+      - name: Fournir la preview NON VALIDEE
         uses: actions/upload-artifact@v4
         with:
-          name: eveil-web-itch
+          name: EVEIL-v034-PREVIEW-NON-VALIDEE
           path: eveil/build/eveil_web_itch.zip
-          if-no-files-found: error
+          retention-days: 7
 
-      - name: Conserver les journaux, meme en cas d'echec
+      - name: Conserver les journaux
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: eveil-journaux-godot
+          name: EVEIL-v034-LOGS
           path: eveil/build/logs/
           if-no-files-found: warn
+
+      - name: Signaler les tests echoues
+        if: steps.tests.outcome == 'failure'
+        run: |
+          echo 'Preview non validee : tests en echec'
+          exit 1
