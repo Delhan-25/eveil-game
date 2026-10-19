@@ -18,8 +18,8 @@ jobs:
 
       - name: Decompresser le projet de Claude
         run: |
-          test -f eveil_v0.3.2.zip
-          unzip -q -o eveil_v0.3.2.zip
+          test -f eveil_v0.3.3.zip
+          unzip -q -o eveil_v0.3.3.zip
           test -f eveil/project.godot
 
       - name: Installer Godot 4.3 et les modeles Web
