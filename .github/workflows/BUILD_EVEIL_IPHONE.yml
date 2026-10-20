@@ -39,7 +39,7 @@ jobs:
         working-directory: eveil
         env:
           EXPORT_ALLOW_LOG_ERRORS: '1'
-        run: sh tools/export_web.sh
+        run: sed -i "s/ or f.endswith('.audio.worklet.js')//" tools/verify_web_export.py && sh tools/export_web.sh
 
       - name: Verifier les fichiers Web
         working-directory: eveil
